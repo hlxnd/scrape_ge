@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .container-width {
+            width: 90%;
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .flex-sect {
+            background-color: #fafafa;
+            padding: 100px 0;
+            font-family: Helvetica, serif;
+        }
+
+        .flex-title {
+            margin-bottom: 15px;
+            font-size: 2em;
+            font-weight: 700;
+            color: #555;
+            padding: 5px;
+            text-align: left;
+        }
+
+        .flex-desc {
+            margin-bottom: 55px;
+            font-size: 1em;
+            color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            text-align: left;
+        }
+
+        .cards {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            flex-flow: wrap;
+        }
+
+        .card {
+            background-color: white;
+            height: 300px;
+            width: 500px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+            transition: all 0.5s ease;
+            font-weight: 100;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            margin-top: -5px;
+            box-shadow: 0 20px 30px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            height: 155px;
+            background-image: url("//placehold.it/350x250/78c5d6/fff/image1.jpg");
+            background-size: cover;
+            background-position: center center;
+        }
+
+        .card-header.ch2 {
+            background-image: url("//placehold.it/350x250/459ba8/fff/image2.jpg");
+        }
+
+        .card-header.ch3 {
+            background-image: url("//placehold.it/350x250/79c267/fff/image3.jpg");
+        }
+
+        .card-header.ch4 {
+            background-image: url("//placehold.it/350x250/c5d647/fff/image4.jpg");
+        }
+
+        .card-header.ch5 {
+            background-image: url("//placehold.it/350x250/f28c33/fff/image5.jpg");
+        }
+
+        .card-header.ch6 {
+            background-image: url("//placehold.it/350x250/e868a2/fff/image6.jpg");
+        }
+
+        .card-body {
+            padding: 15px 15px 5px 15px;
+            color: #555;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+
+        .card-sub-title {
+            color: #b3b3b3;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            line-height: 17px;
+        }
+    </style>
+</head>
+<body>
+    <!-- component template -->
+<script type="text/x-template" id="grid-template">
+  
+
+  
+    <div class="container-width">
+        <div class="flex-title"> {{filteredHeroes.length}} offres
+        </div>
+        <div class="flex-desc">Derniere mise-a-jour: 26/02/2019
+        </div>
+
+        <div class="cards">
+            <div v-for="entry in filteredHeroes"  class="card">
+                <div class="card-header">
+                    <img style="overflow:hidden; height:100%; width:100%;object-fit: cover;"
+                      :src="entry.pic">
+                </div>
+                <div class="card-body">
+                    <div class="card-title">{{entry.title}}
+                    </div>
+                    <div class="card-sub-title">{{entry.location}}
+                    </div>
+                    <!-- <div class="card-desc">{{entry.desc}}}
+                    </div> -->
+                    <div class="card-desc">{{entry.price}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </script>
+
+
+<section class="flex-sect">
+
+
+  
+  <!-- demo root element -->
+  <div id="demo">
+    <form id="search">
+      Search <input name="query" v-model="searchQuery">
+    </form>
+    <p></p>
+    <demo-grid
+      :heroes="gridData"
+      :columns="gridColumns"
+      :filter-key="searchQuery">
+    </demo-grid>
+  </div>
+</section>
+  
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script>
+    var theData=[];
+    function loadData(data) {
+      theData=data;
+    }
+    </script>
+  <script src="data.js"></script>
+
+  <script>
+
+      // register the grid component
+Vue.component('demo-grid', {
+  template: '#grid-template',
+  props: {
+    heroes: Array,
+    columns: Array,
+    filterKey: String
+  },
+  data: function () {
+    var sortOrders = {}
+    this.columns.forEach(function (key) {
+      sortOrders[key] = 1
+    })
+    return {
+      sortKey: '',
+      sortOrders: sortOrders
+    }
+  },
+  computed: {
+    filteredHeroes: function () {
+      var sortKey = this.sortKey
+      var filterKey = this.filterKey && this.filterKey.toLowerCase()
+      var order = this.sortOrders[sortKey] || 1
+      var heroes = this.heroes
+      if (filterKey) {
+        heroes = heroes.filter(function (row) {
+          return Object.keys(row).some(function (key) {
+            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+          })
+        })
+      }
+      if (sortKey) {
+        heroes = heroes.slice().sort(function (a, b) {
+          a = a[sortKey]
+          b = b[sortKey]
+          return (a === b ? 0 : a > b ? 1 : -1) * order
+        })
+      }
+      return heroes
+    }
+  },
+  filters: {
+    capitalize: function (str) {
+      return str.charAt(0).toUpperCase() + str.slice(1)
+    }
+  },
+  methods: {
+    sortBy: function (key) {
+      this.sortKey = key
+      this.sortOrders[key] = this.sortOrders[key] * -1
+    }
+  }
+})
+
+// bootstrap the demo
+var demo = new Vue({
+  el: '#demo',
+  data: {
+    searchQuery: '',
+    gridColumns: ['pic','title', 'rooms','location', 'price', 'origin'],
+    gridData: theData
+  }
+})
+  </script>
+</body>
+</html>

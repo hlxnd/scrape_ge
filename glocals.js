@@ -11,10 +11,13 @@ extractEntry = (rawEntry) => {
         origin: "glocals.com",
         origin_id: rawEntry.id,
         title: rawEntry.title,
-        description: rawEntry.description,
+        desc: rawEntry.description,
         rooms: rawEntry.rooms,
         price: rawEntry.price + " " + rawEntry.currency,
-        area: "",     
+        location: rawEntry.location + ", " +rawEntry.city,
+        url: "",
+        area: "",
+        pic: "https://cdn.glocals.com/sites/glocals" + rawEntry.photo1
     }
 }
 
@@ -41,14 +44,17 @@ getEntries = async () => {
     document.querySelector(`select#bl_flat_type:nth-child(1)`).selected = true;
   });
   await page.select(`select#bl_num_room_from`,"4");
+
+  var jsonData = [];
   
   page.on('response', response => {
     if (response.url().endsWith("get_classified_flats"))
         //console.log("response code: ", response.url());
         // do something here
         response.text()
-          .then(text => fs.appendFile('rawdata.txt', text+"\n\n"))
-          .then(text => console.log(JSON.stringify(extractEntries(text),null,"\t") + "\n-----------------------------\n"))
+          .then(text => { fs.appendFile('rawdata.txt', text+"\n\n"); return text; })
+          .then(text => { jsonData = jsonData.concat(extractEntries(text)); return text; })
+          .then(text => { console.log(JSON.stringify(extractEntries(text),null,"\t") + "\n-----------------------------\n"); return text; })
           .catch(err => console.log("\nERROR: "+err+"\n\n"));
     });
 
@@ -98,6 +104,9 @@ getEntries = async () => {
 
   /* Outpitting what we scraped */
   console.log(JSON.stringify(data));
+
+  console.log(jsonData);
+  fs.writeFile("pub/data.js","loadData("+JSON.stringify(jsonData,null,"\t")+");");
 
   await browser.close();
 
