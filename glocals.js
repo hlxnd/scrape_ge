@@ -1,5 +1,7 @@
 // Use puppeteer
 const puppeteer = require('puppeteer');
+const fs = require('fs').promises;
+
 
 // Set page
 const GLOCALS = `https://www.glocals.com/classifieds/housing-and-real-estate/`;
@@ -12,7 +14,7 @@ extractEntry = (rawEntry) => {
         description: rawEntry.description,
         rooms: rawEntry.rooms,
         price: rawEntry.price + " " + rawEntry.currency,
-        area: "",        
+        area: "",     
     }
 }
 
@@ -23,7 +25,13 @@ extractEntries = (rawJson) => {
 
 getEntries = async () => {
   // Initiate the Puppeteer browser
-  const browser = await puppeteer.launch(/*{devtools: true}*/);
+  const browser = await puppeteer.launch({
+    'args' : [
+      '--no-sandbox',
+      '--disable-setuid-sandbox'
+  ],
+  /*{devtools: true}*/
+  });
   const page = await browser.newPage();
   
   // Go to page
@@ -39,8 +47,9 @@ getEntries = async () => {
         //console.log("response code: ", response.url());
         // do something here
         response.text()
-                 .then(text => console.log(JSON.stringify(extractEntries(text),null,"\t") + "\n-----------------------------\n"))
-                 .catch(err => console.log("\nERROR: "+err+"\n\n"));
+          .then(text => fs.appendFile('rawdata.txt', text+"\n\n"))
+          .then(text => console.log(JSON.stringify(extractEntries(text),null,"\t") + "\n-----------------------------\n"))
+          .catch(err => console.log("\nERROR: "+err+"\n\n"));
     });
 
   await page.click(`input[name='search[submit]']`);
@@ -83,6 +92,7 @@ getEntries = async () => {
       let tmp=await getData(page);
       data=data.concat(tmp);
     }
+    // only get one page...
     break;
   }
 
