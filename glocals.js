@@ -80,7 +80,8 @@ getEntries = async () => {
       return data; // Return our data array
     });
 
-    return data;
+    //return data;
+    return jsonData;
   }
 
   let data=[];
@@ -102,12 +103,11 @@ getEntries = async () => {
     break;
   }
 
-  /* Outpitting what we scraped */
-  console.log(JSON.stringify(data));
+  // /* Outpitting what we scraped */
+  // console.log(JSON.stringify(data));
 
-  console.log(jsonData);
-  fs.writeFile("pub/data.js","loadData("+JSON.stringify(jsonData,null,"\t")+");");
-
+  // console.log(jsonData);
+  
   await browser.close();
 
   return data;
